@@ -8,6 +8,9 @@ import math
 # Initialize Pygame
 pygame.init()
 
+#Welcome the user to the game
+print("Welcome to the Tower Defense Game!")
+
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
