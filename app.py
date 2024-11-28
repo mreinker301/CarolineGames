@@ -46,14 +46,27 @@ class Tower:
 
 # Enemy class
 class Enemy:
-    def __init__(self, x, y):
+    def __init__(self, x, y, tower_x, tower_y):
         self.x = x
         self.y = y
+        self.tower_x = tower_x
+        self.tower_y = tower_y
         self.speed = 2
         self.health = 100
 
     def move(self):
-        self.y += self.speed
+        # Calculate direction vector
+        direction_x = self.tower_x - self.x
+        direction_y = self.tower_y - self.y
+        distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
+
+        # Normalize direction vector
+        direction_x /= distance
+        direction_y /= distance
+
+        # Update position
+        self.x += direction_x * self.speed
+        self.y += direction_y * self.speed
 
     def draw(self, screen):
         pygame.draw.rect(screen, RED, (self.x, self.y, 20, 20))
@@ -90,7 +103,7 @@ def main():
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
-            enemies.append(Enemy(random.randint(0, WIDTH), 0))
+            enemies.append(Enemy(random.randint(0, WIDTH), 0, tower.x, tower.y))
 
         # Move enemies
         for enemy in enemies:
