@@ -14,13 +14,35 @@ print("Welcome to the Tower Defense Game!")
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Caroline's Tower Defense Game")
+pygame.display.set_caption("Tower Defense Game")
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+# Button class
+class Button:
+    def __init__(self, x, y, width, height, text, color, text_color):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.color = color
+        self.text_color = text_color
+        self.font = pygame.font.Font(None, 36)
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+        text_surface = self.font.render(self.text, True, self.text_color)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+
+    def is_clicked(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                return True
+        return False
 
 # Tower class
 class Tower:
@@ -107,15 +129,28 @@ def main():
     projectiles = []
     running = True
 
+    # Create a button
+    quitButton = Button(10, 10, 100, 30, "Quit", RED, WHITE)
+    restartButton = Button(10, 50, 100, 30, "Restart", BLUE, WHITE)
+
     while running:
         screen.fill(WHITE)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if quitButton.is_clicked(event):
+                running = False
+            if restartButton.is_clicked(event):
+                enemies = []
+                projectiles = []
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
             enemies.append(Enemy(random.randint(0, WIDTH), 0, tower.x, tower.y))
+
+        # Draw button
+        quitButton.draw(screen)
+        restartButton.draw(screen)
 
         # Move enemies
         for enemy in enemies:
