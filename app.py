@@ -14,7 +14,7 @@ print("Welcome to the Tower Defense Game!")
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Tower Defense Game")
+pygame.display.set_caption("Caroline's Tower Defense Game")
 
 # Colors
 WHITE = (255, 255, 255)
@@ -27,8 +27,8 @@ class Tower:
     def __init__(self, x, y):
         self.x = x              # X-coordinate
         self.y = y              # Y-coordinate
-        self.range = 100        # Range in pixels
-        self.cooldown = 30      # Cooldown in milliseconds
+        self.range = 200        # Range in pixels
+        self.cooldown = 150     # Cooldown in milliseconds
         self.last_shot = 0      # Time of the last shot
 
     def shoot(self, enemies, projectiles):
@@ -85,6 +85,7 @@ class Projectile:
         self.speed = 5
 
     def move(self):
+
         direction_x = self.target.x - self.x
         direction_y = self.target.y - self.y
         distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
@@ -126,6 +127,12 @@ def main():
 
         # Move projectiles
         for projectile in projectiles:
+
+            # Delete the projectile if the target is destroyed
+            if projectile.target not in enemies:
+                projectiles.remove(projectile)
+
+            #Otherwise, move the projectile
             projectile.move()
             projectile.draw(screen)
 
