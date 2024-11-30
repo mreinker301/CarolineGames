@@ -50,7 +50,7 @@ class Tower:
         self.x = x              # X-coordinate
         self.y = y              # Y-coordinate
         self.range = 200        # Range in pixels
-        self.cooldown = 150     # Cooldown in milliseconds
+        self.cooldown = 100     # Cooldown in milliseconds
         self.last_shot = 0      # Time of the last shot
 
     def shoot(self, enemies, projectiles):
@@ -121,6 +121,12 @@ class Projectile:
     def draw(self, screen):
         pygame.draw.circle(screen, BLACK, (int(self.x), int(self.y)), 5)
 
+# Function to display cash
+def display_cash(screen, cash):
+    font = pygame.font.Font(None, 36)
+    text_surface = font.render(f"Cash: ${cash}", True, BLACK)
+    screen.blit(text_surface, (WIDTH - 150, 10))
+
 # Main game loop
 def main():
     clock = pygame.time.Clock()
@@ -128,6 +134,7 @@ def main():
     enemies = []
     projectiles = []
     running = True
+    cash = 0
 
     # Create a button
     quitButton = Button(10, 10, 100, 30, "Quit", RED, WHITE)
@@ -143,6 +150,7 @@ def main():
             if restartButton.is_clicked(event):
                 enemies = []
                 projectiles = []
+                cash = 0
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
@@ -180,9 +188,13 @@ def main():
                     projectiles.remove(projectile)  # Remove projectile
                     if enemy.health <= 0:
                         enemies.remove(enemy)  # Remove enemy if health is zero
+                        cash += 10
 
         # Draw tower
         tower.draw(screen)
+
+        # Display cash
+        display_cash(screen, cash)
 
         pygame.display.flip()
         clock.tick(60)
