@@ -25,23 +25,25 @@ GREEN = (0, 255, 0)
 # Tower class
 class Tower:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.range = 150
-        self.cooldown = 30
-        self.last_shot = 0
+        self.x = x              # X-coordinate
+        self.y = y              # Y-coordinate
+        self.range = 100        # Range in pixels
+        self.cooldown = 30      # Cooldown in milliseconds
+        self.last_shot = 0      # Time of the last shot
 
     def shoot(self, enemies, projectiles):
+        # Shoot if cooldown has elapsed
         if pygame.time.get_ticks() - self.last_shot > self.cooldown:
+
+            # Find the nearest enemy
             for enemy in enemies:
-                if self.in_range(enemy):
+                distance = math.hypot(enemy.x - self.x, enemy.y - self.y)
+
+                # Shoot if the enemy is within range
+                if distance < self.range:
                     projectiles.append(Projectile(self.x, self.y, enemy))
                     self.last_shot = pygame.time.get_ticks()
                     break
-
-    def in_range(self, enemy):
-        distance = math.hypot(self.x - enemy.x, self.y - enemy.y)
-        return distance <= self.range
 
     def draw(self, screen):
         pygame.draw.circle(screen, GREEN, (self.x, self.y), 20)
@@ -83,9 +85,15 @@ class Projectile:
         self.speed = 5
 
     def move(self):
-        angle = math.atan2(self.target.y - self.y, self.target.x - self.x)
-        self.x += self.speed * math.cos(angle)
-        self.y += self.speed * math.sin(angle)
+        direction_x = self.target.x - self.x
+        direction_y = self.target.y - self.y
+        distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
+
+        direction_x /= distance
+        direction_y /= distance
+
+        self.x += direction_x * self.speed
+        self.y += direction_y * self.speed
 
     def draw(self, screen):
         pygame.draw.circle(screen, BLACK, (int(self.x), int(self.y)), 5)
@@ -120,6 +128,16 @@ def main():
         for projectile in projectiles:
             projectile.move()
             projectile.draw(screen)
+
+        # Check for collisions
+        for projectile in projectiles[:]:
+            for enemy in enemies[:]:
+                distance = math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
+                if distance < 10:  # Assuming 10 is the collision threshold
+                    enemy.health -= 50  # Reduce enemy health
+                    projectiles.remove(projectile)  # Remove projectile
+                    if enemy.health <= 0:
+                        enemies.remove(enemy)  # Remove enemy if health is zero
 
         # Draw tower
         tower.draw(screen)
