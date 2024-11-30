@@ -23,6 +23,22 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
+# Game class
+class Game:
+    def __init__(self):
+        self.tower = Tower(WIDTH // 2, HEIGHT // 2)
+        self.enemies = []
+        self.projectiles = []
+        self.running = True
+        self.cash = 0
+        self.speed = 1
+    def updateSpeed(self, speed):
+        self.speed = speed
+    def reset(self):
+        self.enemies = []
+        self.projectiles = []
+        self.cash = 0
+
 # Button class
 class Button:
     def __init__(self, x, y, width, height, text, color, text_color):
