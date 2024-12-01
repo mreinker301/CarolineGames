@@ -4,6 +4,8 @@
 import pygame
 import random
 import math
+from colors import *
+from gameElements import Tower, Enemy, Projectile
 
 # Initialize Pygame
 pygame.init()
@@ -16,12 +18,7 @@ WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Tower Defense Game")
 
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+
 
 # Game class
 class Game:
@@ -49,7 +46,7 @@ class Button:
         self.text = text
         self.color = color
         self.text_color = text_color
-        self.font = pygame.font.Font(None, 18)
+        self.font = pygame.font.Font(None, 14)
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
@@ -63,82 +60,7 @@ class Button:
                 return True
         return False
 
-# Tower class
-class Tower:
-    def __init__(self, x, y):
-        self.x = x              # X-coordinate
-        self.y = y              # Y-coordinate
-        self.range = 200        # Range in pixels
-        self.cooldown = 100     # Cooldown in milliseconds
-        self.last_shot = 0      # Time of the last shot
 
-    def shoot(self, enemies, projectiles, attackSpeedMult):
-        # Shoot if cooldown has elapsed
-        if pygame.time.get_ticks() - self.last_shot > self.cooldown/attackSpeedMult:
-
-            # Find the nearest enemy
-            for enemy in enemies:
-                distance = math.hypot(enemy.x - self.x, enemy.y - self.y)
-
-                # Shoot if the enemy is within range
-                if distance < self.range:
-                    projectiles.append(Projectile(self.x, self.y, enemy))
-                    self.last_shot = pygame.time.get_ticks()
-                    break
-
-    def draw(self, screen):
-        pygame.draw.circle(screen, GREEN, (self.x, self.y), 20)
-        pygame.draw.circle(screen, GREEN, (self.x, self.y), self.range, 1)
-
-# Enemy class
-class Enemy:
-    def __init__(self, x, y, tower_x, tower_y):
-        self.x = x
-        self.y = y
-        self.tower_x = tower_x
-        self.tower_y = tower_y
-        self.speed = 2
-        self.health = 100
-
-    def move(self,speedFactor):
-        # Calculate direction vector
-        direction_x = self.tower_x - self.x
-        direction_y = self.tower_y - self.y
-        distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
-
-        # Normalize direction vector
-        direction_x /= distance
-        direction_y /= distance
-
-        # Update position
-        self.x += direction_x * self.speed * speedFactor
-        self.y += direction_y * self.speed * speedFactor
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, RED, (self.x, self.y, 20, 20))
-
-# Projectile class
-class Projectile:
-    def __init__(self, x, y, target):
-        self.x = x
-        self.y = y
-        self.target = target
-        self.speed = 5
-
-    def move(self, speedFactor):
-
-        direction_x = self.target.x - self.x
-        direction_y = self.target.y - self.y
-        distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
-
-        direction_x /= distance
-        direction_y /= distance
-
-        self.x += direction_x * self.speed * speedFactor
-        self.y += direction_y * self.speed * speedFactor
-
-    def draw(self, screen):
-        pygame.draw.circle(screen, BLACK, (int(self.x), int(self.y)), 5)
 
 def display_game_state(screen, game):
     font = pygame.font.Font(None, 18)
@@ -146,9 +68,9 @@ def display_game_state(screen, game):
     screen.blit(text_surface, (WIDTH - 150, 10))
     text_surface = font.render(f"Speed: {game.speed}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 50))
-    text_surface = font.render(f"Damage Mult: {game.damageMult}", True, BLACK)
+    text_surface = font.render(f"Damage Mult: {round(game.damageMult,1)}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 90))
-    text_surface = font.render(f"Attack Speed Mult: {game.attackSpeedMult}", True, BLACK)
+    text_surface = font.render(f"Attack Speed Mult: {round(game.attackSpeedMult,1)}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 130))
 
 # Main game loop
@@ -165,8 +87,8 @@ def main():
     restartButton = Button(10, 50, 100, 30, "Restart", BLUE, WHITE)
     speedUpButton = Button(10, 90, 100, 30, "Speed Up", GREEN, WHITE)
     speedDownButton = Button(10, 130, 100, 30, "Speed Down", GREEN, WHITE)
-    damageButton = Button(200, 550, 100, 30, "Damage", BLACK, WHITE)
-    attackSpeedButton = Button(500, 550, 100, 30, "Attack Speed", BLACK, WHITE)
+    damageButton = Button(200, 550, 100, 30, "Damage: $100", BLACK, WHITE)
+    attackSpeedButton = Button(500, 550, 100, 30, "Attack Speed: $100", BLACK, WHITE)
 
 
     while running:
@@ -185,11 +107,13 @@ def main():
                 if game.cash >= upgradeCost:
                     game.cash -= 100 * game.damageMult
                     game.damageMult += 0.1
+                    damageButton.text = f"Damage: ${100 * game.damageMult}"
             if attackSpeedButton.is_clicked(event):
                 upgradeCost = 100 * game.attackSpeedMult
                 if game.cash >= upgradeCost:
                     game.cash -= 100 * game.attackSpeedMult
                     game.attackSpeedMult += 0.1
+                    attackSpeedButton.text = f"Attack Speed: ${100 * game.attackSpeedMult}"
                     
 
         # Spawn enemies
@@ -223,7 +147,7 @@ def main():
             projectile.move(game.speed)
             projectile.draw(screen)
 
-        # Check for collisions
+        # Check for collisions between projectiles and enemies
         for projectile in game.projectiles[:]:
             for enemy in game.enemies[:]:
                 distance = math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
@@ -233,6 +157,14 @@ def main():
                     if enemy.health <= 0:
                         game.enemies.remove(enemy)  # Remove enemy if health is zero
                         game.cash += 10
+
+        # Check for enermies reaching the tower
+        for enemy in game.enemies[:]:
+            distance = math.hypot(enemy.x - game.tower.x, enemy.y - game.tower.y)
+            if distance < 10:
+                game.tower.health -= 10
+                if game.tower.health <= 0:
+                    game.running = False
 
         # Draw tower
         game.tower.draw(screen)
