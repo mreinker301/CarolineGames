@@ -46,7 +46,7 @@ class Button:
         self.text = text
         self.color = color
         self.text_color = text_color
-        self.font = pygame.font.Font(None, 36)
+        self.font = pygame.font.Font(None, 18)
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
@@ -97,7 +97,7 @@ class Enemy:
         self.speed = 2
         self.health = 100
 
-    def move(self):
+    def move(self,speedFactor):
         # Calculate direction vector
         direction_x = self.tower_x - self.x
         direction_y = self.tower_y - self.y
@@ -108,8 +108,8 @@ class Enemy:
         direction_y /= distance
 
         # Update position
-        self.x += direction_x * self.speed
-        self.y += direction_y * self.speed
+        self.x += direction_x * self.speed * speedFactor
+        self.y += direction_y * self.speed * speedFactor
 
     def draw(self, screen):
         pygame.draw.rect(screen, RED, (self.x, self.y, 20, 20))
@@ -122,7 +122,7 @@ class Projectile:
         self.target = target
         self.speed = 5
 
-    def move(self):
+    def move(self, speedFactor):
 
         direction_x = self.target.x - self.x
         direction_y = self.target.y - self.y
@@ -131,8 +131,8 @@ class Projectile:
         direction_x /= distance
         direction_y /= distance
 
-        self.x += direction_x * self.speed
-        self.y += direction_y * self.speed
+        self.x += direction_x * self.speed * speedFactor
+        self.y += direction_y * self.speed * speedFactor
 
     def draw(self, screen):
         pygame.draw.circle(screen, BLACK, (int(self.x), int(self.y)), 5)
@@ -145,72 +145,76 @@ def display_cash(screen, cash):
 
 # Main game loop
 def main():
+    
+    #initialize game
     clock = pygame.time.Clock()
-    tower = Tower(WIDTH // 2, HEIGHT // 2)
-    enemies = []
-    projectiles = []
+    game = Game()
     running = True
-    cash = 0
+
 
     # Create a button
     quitButton = Button(10, 10, 100, 30, "Quit", RED, WHITE)
     restartButton = Button(10, 50, 100, 30, "Restart", BLUE, WHITE)
+    speedUpButton = Button(10, 90, 100, 30, "Speed Up", GREEN, WHITE)
+    speedDownButton = Button(10, 130, 100, 30, "Speed Down", GREEN, WHITE)
 
     while running:
         screen.fill(WHITE)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if quitButton.is_clicked(event):
+            if event.type == pygame.QUIT or quitButton.is_clicked(event):
                 running = False
             if restartButton.is_clicked(event):
-                enemies = []
-                projectiles = []
-                cash = 0
+                game.reset()
+            if speedUpButton.is_clicked(event):
+                game.speed += 0.1
+            if speedDownButton.is_clicked(event):
+                game.speed -= 0.1
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
-            enemies.append(Enemy(random.randint(0, WIDTH), 0, tower.x, tower.y))
+            game.enemies.append(Enemy(random.randint(0, WIDTH), 0, game.tower.x, game.tower.y))
 
         # Draw button
         quitButton.draw(screen)
         restartButton.draw(screen)
+        speedUpButton.draw(screen)
+        speedDownButton.draw(screen)
 
         # Move enemies
-        for enemy in enemies:
-            enemy.move()
+        for enemy in game.enemies:
+            enemy.move(game.speed)
             enemy.draw(screen)
 
         # Shoot projectiles
-        tower.shoot(enemies, projectiles)
+        game.tower.shoot(game.enemies, game.projectiles)
 
         # Move projectiles
-        for projectile in projectiles:
+        for projectile in game.projectiles:
 
             # Delete the projectile if the target is destroyed
-            if projectile.target not in enemies:
-                projectiles.remove(projectile)
+            if projectile.target not in game.enemies:
+                game.projectiles.remove(projectile)
 
             #Otherwise, move the projectile
-            projectile.move()
+            projectile.move(game.speed)
             projectile.draw(screen)
 
         # Check for collisions
-        for projectile in projectiles[:]:
-            for enemy in enemies[:]:
+        for projectile in game.projectiles[:]:
+            for enemy in game.enemies[:]:
                 distance = math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
                 if distance < 10:  # Assuming 10 is the collision threshold
                     enemy.health -= 50  # Reduce enemy health
-                    projectiles.remove(projectile)  # Remove projectile
+                    game.projectiles.remove(projectile)  # Remove projectile
                     if enemy.health <= 0:
-                        enemies.remove(enemy)  # Remove enemy if health is zero
-                        cash += 10
+                        game.enemies.remove(enemy)  # Remove enemy if health is zero
+                        game.cash += 10
 
         # Draw tower
-        tower.draw(screen)
+        game.tower.draw(screen)
 
         # Display cash
-        display_cash(screen, cash)
+        display_cash(screen, game.cash)
 
         pygame.display.flip()
         clock.tick(60)
