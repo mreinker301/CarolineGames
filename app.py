@@ -181,11 +181,16 @@ def main():
             if speedDownButton.is_clicked(event):
                 game.speed -= 0.1
             if damageButton.is_clicked(event):
-                game.damageMult += 0.1
-                game.cash -= 100 * game.damageMult
+                upgradeCost = 100 * game.damageMult
+                if game.cash >= upgradeCost:
+                    game.cash -= 100 * game.damageMult
+                    game.damageMult += 0.1
             if attackSpeedButton.is_clicked(event):
-                game.attackSpeedMult += 0.1
-                game.cash -= 100 * game.attackSpeedMult
+                upgradeCost = 100 * game.attackSpeedMult
+                if game.cash >= upgradeCost:
+                    game.cash -= 100 * game.attackSpeedMult
+                    game.attackSpeedMult += 0.1
+                    
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
