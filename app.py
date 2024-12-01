@@ -141,7 +141,7 @@ class Projectile:
         pygame.draw.circle(screen, BLACK, (int(self.x), int(self.y)), 5)
 
 def display_game_state(screen, game):
-    font = pygame.font.Font(None, 36)
+    font = pygame.font.Font(None, 18)
     text_surface = font.render(f"Cash: ${game.cash}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 10))
     text_surface = font.render(f"Speed: {game.speed}", True, BLACK)
