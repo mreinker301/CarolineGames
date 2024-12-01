@@ -32,6 +32,8 @@ class Game:
         self.running = True
         self.cash = 0
         self.speed = 1
+        self.damageMult = 1
+        self.attackSpeedMult = 1
     def updateSpeed(self, speed):
         self.speed = speed
     def reset(self):
@@ -70,9 +72,9 @@ class Tower:
         self.cooldown = 100     # Cooldown in milliseconds
         self.last_shot = 0      # Time of the last shot
 
-    def shoot(self, enemies, projectiles):
+    def shoot(self, enemies, projectiles, attackSpeedMult):
         # Shoot if cooldown has elapsed
-        if pygame.time.get_ticks() - self.last_shot > self.cooldown:
+        if pygame.time.get_ticks() - self.last_shot > self.cooldown/attackSpeedMult:
 
             # Find the nearest enemy
             for enemy in enemies:
@@ -159,11 +161,14 @@ def main():
     running = True
 
 
-    # Create a button
+    # Create the buttons
     quitButton = Button(10, 10, 100, 30, "Quit", RED, WHITE)
     restartButton = Button(10, 50, 100, 30, "Restart", BLUE, WHITE)
     speedUpButton = Button(10, 90, 100, 30, "Speed Up", GREEN, WHITE)
     speedDownButton = Button(10, 130, 100, 30, "Speed Down", GREEN, WHITE)
+    damageButton = Button(200, 550, 100, 30, "Damage", BLACK, WHITE)
+    attackSpeedButton = Button(500, 550, 100, 30, "Attack Speed", BLACK, WHITE)
+
 
     while running:
         screen.fill(WHITE)
@@ -176,6 +181,12 @@ def main():
                 game.speed += 0.1
             if speedDownButton.is_clicked(event):
                 game.speed -= 0.1
+            if damageButton.is_clicked(event):
+                game.damageMult += 0.1
+                game.cash -= 100 * game.damageMult
+            if attackSpeedButton.is_clicked(event):
+                game.attackSpeedMult += 0.1
+                game.cash -= 100 * game.attackSpeedMult
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
@@ -186,6 +197,8 @@ def main():
         restartButton.draw(screen)
         speedUpButton.draw(screen)
         speedDownButton.draw(screen)
+        damageButton.draw(screen)
+        attackSpeedButton.draw(screen)
 
         # Move enemies
         for enemy in game.enemies:
@@ -211,7 +224,7 @@ def main():
             for enemy in game.enemies[:]:
                 distance = math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
                 if distance < 10:  # Assuming 10 is the collision threshold
-                    enemy.health -= 50  # Reduce enemy health
+                    enemy.health -= 50*game.damageMult  # Reduce enemy health
                     game.projectiles.remove(projectile)  # Remove projectile
                     if enemy.health <= 0:
                         game.enemies.remove(enemy)  # Remove enemy if health is zero
