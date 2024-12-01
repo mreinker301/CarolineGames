@@ -142,7 +142,7 @@ class Projectile:
 
 def display_game_state(screen, game):
     font = pygame.font.Font(None, 18)
-    text_surface = font.render(f"Cash: ${game.cash}", True, BLACK)
+    text_surface = font.render(f"Cash: ${round(game.cash)}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 10))
     text_surface = font.render(f"Speed: {game.speed}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 50))
@@ -234,12 +234,6 @@ def main():
 
         # Display game state
         display_game_state(screen, game)
-
-        # Display cash
-        #display_cash(screen, round(game.cash))
-
-        # Display speed
-        #display_speed(screen, game.speed)
 
         pygame.display.flip()
         clock.tick(60)
