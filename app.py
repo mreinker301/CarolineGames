@@ -140,17 +140,16 @@ class Projectile:
     def draw(self, screen):
         pygame.draw.circle(screen, BLACK, (int(self.x), int(self.y)), 5)
 
-# Function to display cash
-def display_cash(screen, cash):
+def display_game_state(screen, game):
     font = pygame.font.Font(None, 36)
-    text_surface = font.render(f"Cash: ${cash}", True, BLACK)
+    text_surface = font.render(f"Cash: ${game.cash}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 10))
-
-# Function to display current game speed
-def display_speed(screen, speed):
-    font = pygame.font.Font(None, 36)
-    text_surface = font.render(f"Speed: {speed}", True, BLACK)
+    text_surface = font.render(f"Speed: {game.speed}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 50))
+    text_surface = font.render(f"Damage Mult: {game.damageMult}", True, BLACK)
+    screen.blit(text_surface, (WIDTH - 150, 90))
+    text_surface = font.render(f"Attack Speed Mult: {game.attackSpeedMult}", True, BLACK)
+    screen.blit(text_surface, (WIDTH - 150, 130))
 
 # Main game loop
 def main():
@@ -233,11 +232,14 @@ def main():
         # Draw tower
         game.tower.draw(screen)
 
+        # Display game state
+        display_game_state(screen, game)
+
         # Display cash
-        display_cash(screen, game.cash)
+        #display_cash(screen, round(game.cash))
 
         # Display speed
-        display_speed(screen, game.speed)
+        #display_speed(screen, game.speed)
 
         pygame.display.flip()
         clock.tick(60)
