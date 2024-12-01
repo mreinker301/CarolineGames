@@ -206,7 +206,7 @@ def main():
             enemy.draw(screen)
 
         # Shoot projectiles
-        game.tower.shoot(game.enemies, game.projectiles)
+        game.tower.shoot(game.enemies, game.projectiles, game.attackSpeedMult)
 
         # Move projectiles
         for projectile in game.projectiles:
