@@ -38,6 +38,7 @@ class Game:
         self.enemies = []
         self.projectiles = []
         self.cash = 0
+        self.speed = 1
 
 # Button class
 class Button:
@@ -143,6 +144,12 @@ def display_cash(screen, cash):
     text_surface = font.render(f"Cash: ${cash}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 10))
 
+# Function to display current game speed
+def display_speed(screen, speed):
+    font = pygame.font.Font(None, 36)
+    text_surface = font.render(f"Speed: {speed}", True, BLACK)
+    screen.blit(text_surface, (WIDTH - 150, 50))
+
 # Main game loop
 def main():
     
@@ -215,6 +222,9 @@ def main():
 
         # Display cash
         display_cash(screen, game.cash)
+
+        # Display speed
+        display_speed(screen, game.speed)
 
         pygame.display.flip()
         clock.tick(60)
