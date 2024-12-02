@@ -64,7 +64,9 @@ class Button:
 # the current value of the attribute and the cost to upgrade it
 class Attribute:
     def __init__(self, x, y, width, height, text, color, text_color, value, cost):
-        self.rect = pygame.Rect(x, y, width, height)
+        self.name = pygame.Rect(x, y, width/2, height)
+        self.value = pygame.Rect(x + width/2, y, width/2, height/2)
+        self.costText = pygame.Rect(x + width/2, y+height/2, width/2, height/2)
         self.text = text
         self.color = color
         self.text_color = text_color
@@ -73,9 +75,22 @@ class Attribute:
         self.cost = cost
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+        # Draw the name of the attribute
+        pygame.draw.rect(screen, self.color, self.name)
         text_surface = self.font.render(self.text, True, self.text_color)
-        text_rect = text_surface.get_rect(center=self.rect.center)
+        text_rect = text_surface.get_rect(center=self.name.center)
+        screen.blit(text_surface, text_rect)
+
+        # Draw the value of the attribute
+        pygame.draw.rect(screen, self.color, self.value)
+        text_surface = self.font.render(self.value, True, self.text_color)
+        text_rect = text_surface.get_rect(center=self.value.center)
+        screen.blit(text_surface, text_rect)
+
+        # Draw the cost of the attribute
+        pygame.draw.rect(screen, self.color, self.costText)
+        text_surface = self.font.render(self.cost, True, self.text_color)
+        text_rect = text_surface.get_rect(center=self.costText.center)
         screen.blit(text_surface, text_rect)
 
     def is_clicked(self, event):
