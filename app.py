@@ -30,8 +30,6 @@ class Game:
         self.running = True
         self.cash = 0
         self.gameSpeed = 1
-        self.damageMult = 1
-        self.attackSpeedMult = 1
         self.mults = {"Damage": 1, "Attack Speed": 1, "Range": 1, "Health": 1}
     def updateSpeed(self, speed):
         self.gameSpeed = speed
@@ -84,7 +82,7 @@ class Attribute:
 
     def draw(self, screen):
         # Draw the border
-        pygame.draw.rect(screen, self.text_color, self.border_rect, 2)  # Border with width 2
+        pygame.draw.rect(screen, self.text_color, self.border_rect, 10)  # Border with width 10
 
         # Draw the name of the attribute
         pygame.draw.rect(screen, self.color, self.name_rect)
@@ -94,13 +92,13 @@ class Attribute:
 
         # Draw the value of the attribute
         pygame.draw.rect(screen, self.color, self.value_rect)
-        text_surface = self.font.render(str(self.value), True, self.text_color)  # Ensure value is a string
+        text_surface = self.font.render(str(round(self.value,1)), True, self.text_color)  # Ensure value is a string
         text_rect = text_surface.get_rect(center=self.value_rect.center)
         screen.blit(text_surface, text_rect)
 
         # Draw the cost of the attribute
         pygame.draw.rect(screen, self.color, self.cost_rect)
-        text_surface = self.font.render("$"+str(self.cost), True, self.text_color)  # Ensure cost is a string
+        text_surface = self.font.render("$"+str(round(self.cost,1)), True, self.text_color)  # Ensure cost is a string
         text_rect = text_surface.get_rect(center=self.cost_rect.center)
         screen.blit(text_surface, text_rect)
 
@@ -117,10 +115,6 @@ def display_game_state(screen, game):
     screen.blit(text_surface, (WIDTH - 150, 10))
     text_surface = font.render(f"Speed: {game.gameSpeed}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 50))
-    # text_surface = font.render(f"Damage Mult: {round(game.damageMult,1)}", True, BLACK)
-    # screen.blit(text_surface, (WIDTH - 150, 90))
-    # text_surface = font.render(f"Attack Speed Mult: {round(game.attackSpeedMult,1)}", True, BLACK)
-    # screen.blit(text_surface, (WIDTH - 150, 130))
 
 # Main game loop
 def main():
@@ -136,12 +130,10 @@ def main():
     restartButton = Button(10, 50, 100, 30, "Restart", BLUE, WHITE)
     speedUpButton = Button(10, 90, 100, 30, "Speed Up", GREEN, WHITE)
     speedDownButton = Button(10, 130, 100, 30, "Speed Down", GREEN, WHITE)
-    damageButton = Button(200, 550, 100, 30, "Damage: $100", BLACK, WHITE)
-    attackSpeedButton = Button(500, 550, 100, 30, "Attack Speed: $100", BLACK, WHITE)
-
-    if DEBUG:
-        test = Attribute(50, 550, 100, 30, WHITE, BLACK, "Damage", game)
-
+    damageButton = Attribute(50, 550, 120, 30, BLACK, WHITE, "Damage", game)
+    attackSpeedButton = Attribute(200, 550, 120, 30, BLACK, WHITE, "Attack Speed", game)
+    rangeButton = Attribute(350, 550, 120, 30, BLACK, WHITE, "Range", game)
+    healthButton = Attribute(500, 550, 120, 30, BLACK, WHITE, "Health", game)
 
     while running:
         screen.fill(WHITE)
@@ -155,24 +147,25 @@ def main():
             if speedDownButton.is_clicked(event):
                 game.speed -= 0.1
             if damageButton.is_clicked(event):
-                upgradeCost = 100 * game.damageMult
-                if game.cash >= upgradeCost:
-                    game.cash -= 100 * game.damageMult
-                    game.damageMult += 0.1
-                    damageButton.text = f"Damage: ${100 * game.damageMult}"
+                if game.canUpgrade(damageButton.key):
+                    game.upgrade(damageButton.key)
+                    damageButton.value = game.mults[damageButton.key]
+                    damageButton.cost = 100 * game.mults[damageButton.key]
             if attackSpeedButton.is_clicked(event):
-                upgradeCost = 100 * game.attackSpeedMult
-                if game.cash >= upgradeCost:
-                    game.cash -= 100 * game.attackSpeedMult
-                    game.attackSpeedMult += 0.1
-                    attackSpeedButton.text = f"Attack Speed: ${100 * game.attackSpeedMult}"
-            if DEBUG:
-                if test.is_clicked(event):
-                    # Check to see if the player can upgrade the attribute
-                    if game.canUpgrade(test.key):
-                        game.upgrade(test.key)
-                        test.value = game.mults[test.key]
-                        test.cost = 100 * game.mults[test.key]
+                if game.canUpgrade(attackSpeedButton.key):
+                    game.upgrade(attackSpeedButton.key)
+                    attackSpeedButton.value = game.mults[attackSpeedButton.key]
+                    attackSpeedButton.cost = 100 * game.mults[attackSpeedButton.key]
+            if rangeButton.is_clicked(event):
+                if game.canUpgrade(rangeButton.key):
+                    game.upgrade(rangeButton.key)
+                    rangeButton.value = game.mults[rangeButton.key]
+                    rangeButton.cost = 100 * game.mults[rangeButton.key]
+            if healthButton.is_clicked(event):
+                if game.canUpgrade(healthButton.key):
+                    game.upgrade(healthButton.key)
+                    healthButton.value = game.mults[healthButton.key]
+                    healthButton.cost = 100 * game.mults[healthButton.key]
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
@@ -185,9 +178,8 @@ def main():
         speedDownButton.draw(screen)
         damageButton.draw(screen)
         attackSpeedButton.draw(screen)
-
-        if DEBUG:
-            test.draw(screen)
+        rangeButton.draw(screen)
+        healthButton.draw(screen)
 
         # Move enemies
         for enemy in game.enemies:
@@ -195,7 +187,7 @@ def main():
             enemy.draw(screen)
 
         # Shoot projectiles
-        game.tower.shoot(game.enemies, game.projectiles, game.attackSpeedMult)
+        game.tower.shoot(game.enemies, game.projectiles, game.mults["Attack Speed"])
 
         # Move projectiles
         for projectile in game.projectiles:
@@ -213,7 +205,7 @@ def main():
             for enemy in game.enemies[:]:
                 distance = math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
                 if distance < 10:  # Assuming 10 is the collision threshold
-                    enemy.health -= 50*game.damageMult  # Reduce enemy health
+                    enemy.health -= 50*game.mults["Damage"]  # Reduce enemy health
                     game.projectiles.remove(projectile)  # Remove projectile
                     if enemy.health <= 0:
                         game.enemies.remove(enemy)  # Remove enemy if health is zero
