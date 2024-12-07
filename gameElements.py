@@ -8,10 +8,12 @@ class Tower:
     def __init__(self, x, y):
         self.x = x              # X-coordinate
         self.y = y              # Y-coordinate
-        self.range = 150        # Range in pixels
+        self.baseRange = 150    # Range in pixels
+        self.range = 150        # Range multiplier
         self.cooldown = 100     # Cooldown in milliseconds
         self.last_shot = 0      # Time of the last shot
-        self.health = 100       # Health points
+        self.baseHealth = 100   # Health points
+        self.healthMult = 1.0
 
     def shoot(self, enemies, projectiles, attackSpeedMult):
         # Shoot if cooldown has elapsed
@@ -30,6 +32,12 @@ class Tower:
     def draw(self, screen):
         pygame.draw.circle(screen, BLACK, (self.x, self.y), 20)
         pygame.draw.circle(screen, BLACK, (self.x, self.y), self.range, 1)
+
+    def updateRange(self, range):
+        self.range = range
+
+    def updateHealth(self, health):
+        self.health = health
 
 # Enemy class
 class Enemy:

@@ -161,11 +161,13 @@ def main():
                     game.upgrade(rangeButton.key)
                     rangeButton.value = game.mults[rangeButton.key]
                     rangeButton.cost = 100 * game.mults[rangeButton.key]
+                    game.tower.updateRange(game.mults[rangeButton.key]*game.tower.baseRange)
             if healthButton.is_clicked(event):
                 if game.canUpgrade(healthButton.key):
                     game.upgrade(healthButton.key)
                     healthButton.value = game.mults[healthButton.key]
                     healthButton.cost = 100 * game.mults[healthButton.key]
+                    game.tower.updateHealth(game.mults[healthButton.key]*game.tower.baseHealth)
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
