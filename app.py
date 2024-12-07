@@ -7,16 +7,19 @@ import math
 from colors import *
 from gameElements import Tower, Enemy, Projectile
 
+# Debug mode
+DEBUG = True
+
 # Initialize Pygame
 pygame.init()
 
 #Welcome the user to the game
-print("Welcome to the Tower Defense Game!")
+print("Welcome to Caroline's Tower Defense Game!")
 
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Tower Defense Game")
+pygame.display.set_caption("Caroline's Tower Defense Game")
 
 # Game class
 class Game:
@@ -58,44 +61,46 @@ class Button:
                 return True
         return False
 
-#----------------------- WIP -------------------------#
-
 # Attribute class: Display the name of the attribute on the left and then make a button on the right which displays
 # the current value of the attribute and the cost to upgrade it
 class Attribute:
     def __init__(self, x, y, width, height, text, color, text_color, value, cost):
-        self.name = pygame.Rect(x, y, width/2, height)
-        self.value = pygame.Rect(x + width/2, y, width/2, height/2)
-        self.costText = pygame.Rect(x + width/2, y+height/2, width/2, height/2)
+        self.name_rect = pygame.Rect(x, y, width/2, height)
+        self.value_rect = pygame.Rect(x + width/2, y, width/2, height/2)
+        self.cost_rect = pygame.Rect(x + width/2, y + height/2, width/2, height/2)
         self.text = text
         self.color = color
         self.text_color = text_color
         self.font = pygame.font.Font(None, 14)
         self.value = value
         self.cost = cost
+        self.border_rect = pygame.Rect(x, y, width, height)  # Define the border rectangle
 
     def draw(self, screen):
+        # Draw the border
+        pygame.draw.rect(screen, self.text_color, self.border_rect, 2)  # Border with width 2
+
         # Draw the name of the attribute
-        pygame.draw.rect(screen, self.color, self.name)
+        pygame.draw.rect(screen, self.color, self.name_rect)
         text_surface = self.font.render(self.text, True, self.text_color)
-        text_rect = text_surface.get_rect(center=self.name.center)
+        text_rect = text_surface.get_rect(center=self.name_rect.center)
         screen.blit(text_surface, text_rect)
 
         # Draw the value of the attribute
-        pygame.draw.rect(screen, self.color, self.value)
-        text_surface = self.font.render(self.value, True, self.text_color)
-        text_rect = text_surface.get_rect(center=self.value.center)
+        pygame.draw.rect(screen, self.color, self.value_rect)
+        text_surface = self.font.render(str(self.value), True, self.text_color)  # Ensure value is a string
+        text_rect = text_surface.get_rect(center=self.value_rect.center)
         screen.blit(text_surface, text_rect)
 
         # Draw the cost of the attribute
-        pygame.draw.rect(screen, self.color, self.costText)
-        text_surface = self.font.render(self.cost, True, self.text_color)
-        text_rect = text_surface.get_rect(center=self.costText.center)
+        pygame.draw.rect(screen, self.color, self.cost_rect)
+        text_surface = self.font.render("$"+str(self.cost), True, self.text_color)  # Ensure cost is a string
+        text_rect = text_surface.get_rect(center=self.cost_rect.center)
         screen.blit(text_surface, text_rect)
 
     def is_clicked(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
+            if self.name_rect.collidepoint(event.pos) or self.value_rect.collidepoint(event.pos) or self.cost_rect.collidepoint(event.pos):
                 return True
 
 def display_game_state(screen, game):
@@ -126,6 +131,9 @@ def main():
     damageButton = Button(200, 550, 100, 30, "Damage: $100", BLACK, WHITE)
     attackSpeedButton = Button(500, 550, 100, 30, "Attack Speed: $100", BLACK, WHITE)
 
+    if DEBUG:
+        test = Attribute(50, 550, 100, 30, "Damage", WHITE, BLACK, "1", "100")
+
 
     while running:
         screen.fill(WHITE)
@@ -150,6 +158,10 @@ def main():
                     game.cash -= 100 * game.attackSpeedMult
                     game.attackSpeedMult += 0.1
                     attackSpeedButton.text = f"Attack Speed: ${100 * game.attackSpeedMult}"
+            if DEBUG:
+                if test.is_clicked(event):
+                    test.value = str(round(float(test.value) + 0.1,1))
+                    test.cost = str(int(float(test.cost) * 1.1))
                     
 
         # Spawn enemies
@@ -163,6 +175,9 @@ def main():
         speedDownButton.draw(screen)
         damageButton.draw(screen)
         attackSpeedButton.draw(screen)
+
+        if DEBUG:
+            test.draw(screen)
 
         # Move enemies
         for enemy in game.enemies:

@@ -8,7 +8,7 @@ class Tower:
     def __init__(self, x, y):
         self.x = x              # X-coordinate
         self.y = y              # Y-coordinate
-        self.range = 200        # Range in pixels
+        self.range = 150        # Range in pixels
         self.cooldown = 100     # Cooldown in milliseconds
         self.last_shot = 0      # Time of the last shot
         self.health = 100       # Health points
@@ -28,8 +28,8 @@ class Tower:
                     break
 
     def draw(self, screen):
-        pygame.draw.circle(screen, GREEN, (self.x, self.y), 20)
-        pygame.draw.circle(screen, GREEN, (self.x, self.y), self.range, 1)
+        pygame.draw.circle(screen, BLACK, (self.x, self.y), 20)
+        pygame.draw.circle(screen, BLACK, (self.x, self.y), self.range, 1)
 
 # Enemy class
 class Enemy:
