@@ -29,16 +29,22 @@ class Game:
         self.projectiles = []
         self.running = True
         self.cash = 0
-        self.speed = 1
+        self.gameSpeed = 1
         self.damageMult = 1
         self.attackSpeedMult = 1
+        self.mults = {"Damage": 1, "Attack Speed": 1, "Range": 1, "Health": 1}
     def updateSpeed(self, speed):
-        self.speed = speed
+        self.gameSpeed = speed
     def reset(self):
         self.enemies = []
         self.projectiles = []
         self.cash = 0
-        self.speed = 1
+        self.gameSpeed = 1
+    def canUpgrade(self, key):
+        return self.cash >= 100 * self.mults[key]
+    def upgrade(self, key):
+        self.cash -= 100 * self.mults[key]
+        self.mults[key] += 0.1
 
 # Button class
 class Button:
@@ -64,16 +70,16 @@ class Button:
 # Attribute class: Display the name of the attribute on the left and then make a button on the right which displays
 # the current value of the attribute and the cost to upgrade it
 class Attribute:
-    def __init__(self, x, y, width, height, text, color, text_color, value, cost):
+    def __init__(self, x, y, width, height, color, text_color, key, game):
         self.name_rect = pygame.Rect(x, y, width/2, height)
         self.value_rect = pygame.Rect(x + width/2, y, width/2, height/2)
         self.cost_rect = pygame.Rect(x + width/2, y + height/2, width/2, height/2)
-        self.text = text
+        self.key = key
         self.color = color
         self.text_color = text_color
         self.font = pygame.font.Font(None, 14)
-        self.value = value
-        self.cost = cost
+        self.value = game.mults[key]
+        self.cost = 100*self.value
         self.border_rect = pygame.Rect(x, y, width, height)  # Define the border rectangle
 
     def draw(self, screen):
@@ -82,7 +88,7 @@ class Attribute:
 
         # Draw the name of the attribute
         pygame.draw.rect(screen, self.color, self.name_rect)
-        text_surface = self.font.render(self.text, True, self.text_color)
+        text_surface = self.font.render(self.key, True, self.text_color)
         text_rect = text_surface.get_rect(center=self.name_rect.center)
         screen.blit(text_surface, text_rect)
 
@@ -103,16 +109,18 @@ class Attribute:
             if self.name_rect.collidepoint(event.pos) or self.value_rect.collidepoint(event.pos) or self.cost_rect.collidepoint(event.pos):
                 return True
 
+            
+
 def display_game_state(screen, game):
     font = pygame.font.Font(None, 18)
     text_surface = font.render(f"Cash: ${round(game.cash)}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 10))
-    text_surface = font.render(f"Speed: {game.speed}", True, BLACK)
+    text_surface = font.render(f"Speed: {game.gameSpeed}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 150, 50))
-    text_surface = font.render(f"Damage Mult: {round(game.damageMult,1)}", True, BLACK)
-    screen.blit(text_surface, (WIDTH - 150, 90))
-    text_surface = font.render(f"Attack Speed Mult: {round(game.attackSpeedMult,1)}", True, BLACK)
-    screen.blit(text_surface, (WIDTH - 150, 130))
+    # text_surface = font.render(f"Damage Mult: {round(game.damageMult,1)}", True, BLACK)
+    # screen.blit(text_surface, (WIDTH - 150, 90))
+    # text_surface = font.render(f"Attack Speed Mult: {round(game.attackSpeedMult,1)}", True, BLACK)
+    # screen.blit(text_surface, (WIDTH - 150, 130))
 
 # Main game loop
 def main():
@@ -132,7 +140,7 @@ def main():
     attackSpeedButton = Button(500, 550, 100, 30, "Attack Speed: $100", BLACK, WHITE)
 
     if DEBUG:
-        test = Attribute(50, 550, 100, 30, "Damage", WHITE, BLACK, "1", "100")
+        test = Attribute(50, 550, 100, 30, WHITE, BLACK, "Damage", game)
 
 
     while running:
@@ -160,9 +168,11 @@ def main():
                     attackSpeedButton.text = f"Attack Speed: ${100 * game.attackSpeedMult}"
             if DEBUG:
                 if test.is_clicked(event):
-                    test.value = str(round(float(test.value) + 0.1,1))
-                    test.cost = str(int(float(test.cost) * 1.1))
-                    
+                    # Check to see if the player can upgrade the attribute
+                    if game.canUpgrade(test.key):
+                        game.upgrade(test.key)
+                        test.value = game.mults[test.key]
+                        test.cost = 100 * game.mults[test.key]
 
         # Spawn enemies
         if random.randint(1, 60) == 1:
@@ -181,7 +191,7 @@ def main():
 
         # Move enemies
         for enemy in game.enemies:
-            enemy.move(game.speed)
+            enemy.move(game.gameSpeed)
             enemy.draw(screen)
 
         # Shoot projectiles
@@ -195,7 +205,7 @@ def main():
                 game.projectiles.remove(projectile)
 
             #Otherwise, move the projectile
-            projectile.move(game.speed)
+            projectile.move(game.gameSpeed)
             projectile.draw(screen)
 
         # Check for collisions between projectiles and enemies
