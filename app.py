@@ -39,6 +39,8 @@ class Game:
         self.projectiles = []
         self.cash = 0
         self.gameSpeed = 1
+        self.wave = 1
+        self.tower.health = self.tower.max_health
     def canUpgrade(self, key):
         return self.cash >= 100 * self.mults[key]
     def upgrade(self, key):
@@ -223,6 +225,7 @@ def main():
                     if enemy.health <= 0:
                         game.enemies.remove(enemy)  # Remove enemy if health is zero
                         game.cash += 10
+                    break           #Make sure we only hit one enemy per projectile
 
         # Check for enermies reaching the tower
         for enemy in game.enemies[:]:
