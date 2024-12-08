@@ -112,9 +112,9 @@ class Attribute:
 def display_game_state(screen, game):
     font = pygame.font.Font(None, 18)
     text_surface = font.render(f"Cash: ${round(game.cash)}", True, BLACK)
-    screen.blit(text_surface, (WIDTH - 150, 10))
+    screen.blit(text_surface, (WIDTH - 100, 10))
     text_surface = font.render(f"Speed: {game.gameSpeed}", True, BLACK)
-    screen.blit(text_surface, (WIDTH - 150, 50))
+    screen.blit(text_surface, (WIDTH - 100, 50))
 
 # Main game loop
 def main():
@@ -130,10 +130,10 @@ def main():
     restartButton = Button(10, 50, 100, 30, "Restart", BLUE, WHITE)
     speedUpButton = Button(10, 90, 100, 30, "Speed Up", GREEN, WHITE)
     speedDownButton = Button(10, 130, 100, 30, "Speed Down", GREEN, WHITE)
-    damageButton = Attribute(50, 550, 120, 30, BLACK, WHITE, "Damage", game)
-    attackSpeedButton = Attribute(200, 550, 120, 30, BLACK, WHITE, "Attack Speed", game)
-    rangeButton = Attribute(350, 550, 120, 30, BLACK, WHITE, "Range", game)
-    healthButton = Attribute(500, 550, 120, 30, BLACK, WHITE, "Health", game)
+    damageButton = Attribute(25, 550, 150, 30, BLACK, WHITE, "Damage", game)
+    attackSpeedButton = Attribute(225, 550, 150, 30, BLACK, WHITE, "Attack Speed", game)
+    rangeButton = Attribute(425, 550, 150, 30, BLACK, WHITE, "Range", game)
+    healthButton = Attribute(625, 550, 150, 30, BLACK, WHITE, "Health", game)
 
     while running:
         screen.fill(WHITE)

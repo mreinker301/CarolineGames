@@ -8,16 +8,15 @@ class Tower:
     def __init__(self, x, y):
         self.x = x              # X-coordinate
         self.y = y              # Y-coordinate
-        self.baseRange = 150    # Range in pixels
-        self.range = 150        # Range multiplier
-        self.cooldown = 100     # Cooldown in milliseconds
+        self.range = 200        # Range in pixels (current)
+        self.cooldown = 150     # Cooldown in milliseconds
         self.last_shot = 0      # Time of the last shot
-        self.baseHealth = 100   # Health points
-        self.healthMult = 1.0
+        self.health = 100       # Health points (current)
+        self.max_health = 100   # Store the maximum health
 
-    def shoot(self, enemies, projectiles, attackSpeedMult):
+    def shoot(self, enemies, projectiles,attackSpeedFactor):
         # Shoot if cooldown has elapsed
-        if pygame.time.get_ticks() - self.last_shot > self.cooldown/attackSpeedMult:
+        if pygame.time.get_ticks() - self.last_shot > self.cooldown/attackSpeedFactor:
 
             # Find the nearest enemy
             for enemy in enemies:
@@ -30,8 +29,25 @@ class Tower:
                     break
 
     def draw(self, screen):
+        # Draw the tower
         pygame.draw.circle(screen, BLACK, (self.x, self.y), 20)
         pygame.draw.circle(screen, BLACK, (self.x, self.y), self.range, 1)
+
+        # Draw the health bar
+        self.draw_health_bar(screen)
+
+    def draw_health_bar(self, screen):
+        # Calculate health bar dimensions
+        bar_width = 40
+        bar_height = 5
+        health_ratio = self.health / self.max_health
+        health_bar_width = bar_width * health_ratio
+
+        # Draw the health bar background
+        pygame.draw.rect(screen, BLACK, (self.x - bar_width // 2, self.y + 30, bar_width, bar_height))
+
+        # Draw the health bar foreground
+        pygame.draw.rect(screen, RED, (self.x - bar_width // 2, self.y + 30, health_bar_width, bar_height))
 
     def updateRange(self, range):
         self.range = range
