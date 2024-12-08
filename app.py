@@ -31,6 +31,7 @@ class Game:
         self.cash = 0
         self.gameSpeed = 1
         self.mults = {"Damage": 1, "Attack Speed": 1, "Range": 1, "Health": 1}
+        self.wave = 1
     def updateSpeed(self, speed):
         self.gameSpeed = speed
     def reset(self):
@@ -115,6 +116,9 @@ def display_game_state(screen, game):
     screen.blit(text_surface, (WIDTH - 100, 10))
     text_surface = font.render(f"Speed: {game.gameSpeed}", True, BLACK)
     screen.blit(text_surface, (WIDTH - 100, 50))
+    font = pygame.font.Font(None, 36)
+    text_surface = font.render(f"Wave: {game.wave}", True, BLACK)
+    screen.blit(text_surface, (WIDTH - 450, 10))
 
 # Main game loop
 def main():
@@ -123,6 +127,7 @@ def main():
     clock = pygame.time.Clock()
     game = Game()
     running = True
+    enemiesSpawned = 0
 
 
     # Create the buttons
@@ -172,6 +177,12 @@ def main():
         # Spawn enemies
         if random.randint(1, 60) == 1:
             game.enemies.append(Enemy(random.randint(0, WIDTH), 0, game.tower.x, game.tower.y))
+            enemiesSpawned += 1
+
+            # Increase wave 
+            if enemiesSpawned == 10*game.wave:
+                game.wave += 1
+                enemiesSpawned = 0
 
         # Draw button
         quitButton.draw(screen)
